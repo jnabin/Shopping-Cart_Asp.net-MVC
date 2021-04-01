@@ -1,0 +1,72 @@
+﻿@model Ch24ShoppingCartMVC.Models.CheckOutViewModel
+
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    Decimal intotal = 0;
+    Double tax = 0.07;
+    Double totalwithtax;
+}
+
+<h2>List</h2>
+@if (Model== null)
+{
+    <p>Nothing in your chechout yet.</p>
+}
+else
+{
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Total quantity</th>
+                <th>price per items</th>
+                <th>total price</th>
+
+            </tr>
+        </thead>
+
+        @foreach (var item in Model.checkoutlist)
+        {
+            var totalprice = (item.Quantity * item.UnitPrice);
+            intotal = (intotal + totalprice);
+
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice $</td>
+                <td>@totalprice $</td>
+            </tr>
+        }
+        @{
+            totalwithtax = ((Double)intotal + ((Double)intotal * tax));
+            Session["checkout"] = Model.checkoutlist;
+            Session["SesTotal"] = intotal;
+            Decimal ctax = (decimal)totalwithtax - intotal;
+            Session["SesTotalwithtax"] = Math.Round((ctax + intotal + 1),2);
+            Session["tax"] = Math.Round((totalwithtax - (double)intotal), 2);
+        }
+    </table>
+
+    <hr />
+    <table>
+        <tr>
+            <td>Total Order Price (Without Tax) :</td>
+            <td></td>
+            <td></td>
+            <td>@intotal $</td>
+        </tr>
+        <tr>
+            <td>Total Order Price (With 7% Tax) :</td>
+            <td></td>
+            <td></td>
+            <td>@totalwithtax $</td>
+        </tr>
+    </table>
+
+            using (Html.BeginForm("PaymentWithPaypal", "Payment", new { amount = totalwithtax }, FormMethod.Post))
+            {
+        <input type="submit" id="btnAdd" value="payment"/>
+    }
+
+}
